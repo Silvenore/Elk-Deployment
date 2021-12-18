@@ -1,0 +1,60 @@
+#!/bin/bash
+
+if [ $uid = 0 ]
+then
+   echo "Do not run the script using sudo."
+   exit
+fi
+
+#Define variables
+op=$HOME/research/sys_info.txt
+ip='$(ip addr | head -9 | tail -1)'
+perm='find /home -type f -perm 777'
+
+#looks for research directory 
+if [ ! -d $HOME/research ]
+then
+  mkdir $HOME/research
+fi
+
+#looks for output file
+if [ -f $OP ]
+then
+  rm -f $op
+fi
+
+echo "$(hostname -s) at you're service." >> $op
+date >> $op
+echo "" >> $op
+echo -e "Machine type info: $MACHTYPE\n" >> $op
+echo -e "Uname info: $(uname -a)\n" >> $op
+echo -e "IP info:$ip\n" >> $op
+echo "Bonus Stats" >> $op
+echo "--------" >> $op
+echo "DNS Servers" >> $op
+cat /etc/resolv.conf >> $op
+echo "Memory Info:" >> $op
+free >> $op
+echo -e "\nCPU Info:" >> $op
+lscpu | grep CPU >> $op
+echo -e "\nDisk Usage:" >> $op
+df -H |head -2 >> $op
+echo -e "\nWho is logged in:\n$(who)\n" >> $op
+
+echo -e "Permission 777 files:\n" >> $op
+sudo $perm >> $op
+echo "" >> $op
+echo -e "Top 10 processes:\n" >> $op
+ps aux --sort -%cpu | head -11 | awk {'print $1, $2, $3, $4, $11'} >> $op
+
+
+paths=('/etc/shadow' '/etc/passwd')
+
+for item in ${paths[@]};
+do
+  ls -l $item
+done
+
+
+for user in ${USERS[@]};
+do 
